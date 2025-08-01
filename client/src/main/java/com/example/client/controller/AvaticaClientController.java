@@ -21,8 +21,9 @@ public class AvaticaClientController {
 
     @PostMapping("/query")
     public CompletableFuture<List<User>> executeQuery(@RequestBody UserBO userBO) {
-       return avaticaClientService.executeQueryUser(userBO.getUserName());
+       return avaticaClientService.executeQueryUser(userBO.getUserName(), userBO.getType());
     }
+
 
 
 }

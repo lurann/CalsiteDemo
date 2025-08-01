@@ -1,6 +1,5 @@
 package com.example.client.service;
 
-import com.example.client.config.DataSourceConfig;
 import com.example.client.entity.User;
 import com.example.client.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @Service
@@ -25,9 +23,8 @@ public class AvaticaClientService  {
     }
 
 
-    public CompletableFuture<List<User>> executeQueryUser(String userName) {
-        return CompletableFuture.supplyAsync(() -> {
-            return userMapper.getUserByName(userName);
-        }, avaticaTaskExecutor);
+    public CompletableFuture<List<User>> executeQueryUser(String userName, String type) {
+        log.info("executeQueryUser: {}-{}", userName, type);
+        return CompletableFuture.supplyAsync(() -> userMapper.getUserByName(userName, type), avaticaTaskExecutor);
     }
 }
