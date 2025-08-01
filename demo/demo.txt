@@ -1,0 +1,213 @@
+package com.example.sql.converter;
+
+import org.apache.calcite.sql.*;
+import org.apache.calcite.sql.parser.SqlParser;
+import org.apache.calcite.sql.pretty.SqlPrettyWriter;
+import org.apache.calcite.sql.util.SqlShuttle;
+import org.apache.calcite.sql.util.SqlVisitor;
+import org.apache.calcite.sql.dialect.*;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * 多对多SQL转换器
+ * 支持任意源数据库到任意目标数据库的转换
+ */
+public class MultiDatabaseSQLConverter {
+
+
+
+
+    /**
+     * 主要转换方法 - 支持所有数据库间的转换
+     */
+    public static String convert(String sql, DatabaseType source, DatabaseType target) throws Exception {
+        return convert(sql, source, target, new ConversionConfig());
+    }
+
+    public static String convert(String sql, DatabaseType source, DatabaseType target, ConversionConfig config)
+            throws Exception {
+
+        // 1. 解析SQL
+        SqlParser.Config parserConfig = SqlParser.config().withDialect(source.getDialect());
+        SqlParser parser = SqlParser.create(sql, parserConfig);
+        SqlNode sqlNode = parser.parseStmt();
+
+        // 2. 应用自定义重写器
+        SqlNode currentNode = sqlNode;
+        if (config.getCustomRewriters() != null) {
+            for (SqlVisitor<SqlNode> rewriter : config.getCustomRewriters()) {
+                currentNode = currentNode.accept(rewriter);
+            }
+        }
+
+        // 3. 应用方言转换重写器
+        DialectConversionRewriter dialectRewriter = new DialectConversionRewriter(source, target, config);
+        currentNode = currentNode.accept(dialectRewriter);
+
+        // 4. 生成目标SQL
+        SqlPrettyWriter writer = new SqlPrettyWriter(target.getDialect());
+        currentNode.unparse(writer, 0, 0);
+
+        return writer.toString();
+    }
+
+    /**
+     * 批量转换方法 - 一次转换到多个目标数据库
+     */
+    public static Map<DatabaseType, String> convertToMultiple(String sql,
+                                                              DatabaseType source,
+                                                              DatabaseType... targets) throws Exception {
+        return convertToMultiple(sql, source, new ConversionConfig(), targets);
+    }
+
+    public static Map<DatabaseType, String> convertToMultiple(String sql,
+                                                              DatabaseType source,
+                                                              ConversionConfig config,
+                                                              DatabaseType... targets) throws Exception {
+        Map<DatabaseType, String> results = new HashMap<>();
+
+        for (DatabaseType target : targets) {
+            if (target != null) {
+                String convertedSql = convert(sql, source, target, config);
+                results.put(target, convertedSql);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * 批量转换方法 - 多个SQL转换到多个目标数据库
+     */
+    public static Map<String, Map<DatabaseType, String>> batchConvert(Map<String, String> sqls,
+                                                                     DatabaseType source,
+                                                                     DatabaseType... targets) {
+        Map<String, Map<DatabaseType, String>> results = new HashMap<>();
+
+        for (Map.Entry<String, String> entry : sqls.entrySet()) {
+            try {
+                Map<DatabaseType, String> converted = convertToMultiple(entry.getValue(), source, targets);
+                results.put(entry.getKey(), converted);
+            } catch (Exception e) {
+                // 记录错误但继续处理其他SQL
+                System.err.println("Error converting SQL '" + entry.getKey() + "': " + e.getMessage());
+                Map<DatabaseType, String> errorResult = new HashMap<>();
+                for (DatabaseType target : targets) {
+                    errorResult.put(target, "ERROR: " + e.getMessage());
+                }
+                results.put(entry.getKey(), errorResult);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * 获取支持的所有转换组合
+     */
+    public static Set<String> getSupportedConversions() {
+        Set<String> conversions = new HashSet<>();
+        DatabaseType[] types = DatabaseType.values();
+
+        for (DatabaseType source : types) {
+            for (DatabaseType target : types) {
+                if (source != target) {
+                    conversions.add(source.name() + " -> " + target.name());
+                }
+            }
+        }
+
+        return conversions;
+    }
+
+    // 便捷方法
+    public static String mysqlToPostgresql(String sql) throws Exception {
+        return convert(sql, DatabaseType.MYSQL, DatabaseType.POSTGRESQL);
+    }
+
+    public static String mysqlToOracle(String sql) throws Exception {
+        return convert(sql, DatabaseType.MYSQL, DatabaseType.ORACLE);
+    }
+
+    public static String postgresqlToMysql(String sql) throws Exception {
+        return convert(sql, DatabaseType.POSTGRESQL, DatabaseType.MYSQL);
+    }
+
+    public static String oracleToPostgresql(String sql) throws Exception {
+        return convert(sql, DatabaseType.ORACLE, DatabaseType.POSTGRESQL);
+    }
+
+    // 使用示例
+    public static void main(String[] args) {
+        try {
+            String mysqlSql = "SELECT IFNULL(user_name, 'Unknown'), " +
+                            CONCAT(first_name, ' ', last_name), " +
+                             "LEN(phone_number) " +
+                             "FROM users WHERE created_date > NOW()";
+
+            System.out.println("=== 单一转换示例 ===");
+            // MySQL到PostgreSQL
+            String pgSql = convert(mysqlSql, DatabaseType.MYSQL, DatabaseType.POSTGRESQL);
+            System.out.println("MySQL -> PostgreSQL: " + pgSql);
+
+            // MySQL到Oracle
+            String oracleSql = convert(mysqlSql, DatabaseType.MYSQL, DatabaseType.ORACLE);
+            System.out.println("MySQL -> Oracle: " + oracleSql);
+
+            System.out.println("\n=== 批量转换到多个目标数据库 ===");
+            // 一次转换到多个数据库
+            Map<DatabaseType, String> multipleResults = convertToMultiple(
+                mysqlSql,
+                DatabaseType.MYSQL,
+                DatabaseType.POSTGRESQL,
+                DatabaseType.ORACLE,
+                DatabaseType.SQLSERVER
+            );
+
+            for (Map.Entry<DatabaseType, String> entry : multipleResults.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+            }
+
+            System.out.println("\n=== 带配置的转换示例 ===");
+            // 带配置的转换
+            ConversionConfig config = new ConversionConfig()
+                .setEnableFunctionConversion(true)
+                .setEnableCaseConversion(true)
+                .setEnableTablePrefixConversion(true)
+                .setTablePrefix("prod_");
+
+            String configuredSql = convert(mysqlSql, DatabaseType.MYSQL, DatabaseType.POSTGRESQL, config);
+            System.out.println("Configured conversion: " + configuredSql);
+
+            System.out.println("\n=== 批量SQL转换示例 ===");
+            // 批量SQL转换
+            Map<String, String> sqlBatch = new HashMap<>();
+            sqlBatch.put("query1", "SELECT * FROM users WHERE id = 1");
+            sqlBatch.put("query2", "SELECT COUNT(*) FROM orders");
+            sqlBatch.put("query3", "SELECT IFNULL(status, 'pending') FROM tasks");
+
+            Map<String, Map<DatabaseType, String>> batchResults = batchConvert(
+                sqlBatch,
+                DatabaseType.MYSQL,
+                DatabaseType.POSTGRESQL,
+                DatabaseType.ORACLE
+            );
+
+            for (Map.Entry<String, Map<DatabaseType, String>> batchEntry : batchResults.entrySet()) {
+                System.out.println("SQL: " + batchEntry.getKey());
+                for (Map.Entry<DatabaseType, String> resultEntry : batchEntry.getValue().entrySet()) {
+                    System.out.println("  -> " + resultEntry.getKey() + ": " + resultEntry.getValue());
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+
+
+SELECT IFNULL(user_name, 'Unknown'), CONCAT(first_name, ' ', last_name), LEN(phone_number) FROM users WHERE created_date > NOW()

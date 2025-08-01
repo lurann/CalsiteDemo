@@ -1,0 +1,52 @@
+{
+  "version": "1.0",
+  "defaultSchema": "mysql",
+  "schemas": [
+    {
+      "name": "mysql",
+      "type": "custom",
+      "factory": "com.example.demo.selfSchemaFactory.CalciteSchemaFactory",
+      "operand": {
+        "jdbcDriver": "com.mysql.cj.jdbc.Driver",
+        "jdbcUrl": "jdbc:mysql://localhost:3306/test",
+        "jdbcUser": "root",
+        "jdbcPassword": "Qq111111",
+        "maximumPoolSize": "10",
+        "minimumIdle": "2",
+        "connectionTimeout": "30000",
+        "idleTimeout": "300000",
+        "maxLifetime": "600000",
+        "leakDetectionThreshold": "60000",
+        "poolName": "calcite-mysql-hikari-pool"
+      }
+    },
+    {
+      "name": "pg",
+      "type": "custom",
+      "factory": "com.example.demo.selfSchemaFactory.CalciteSchemaFactory",
+      "operand": {
+        "jdbcDriver": "org.postgresql.Driver",
+        "jdbcUrl": "jdbc:postgresql://localhost:5432/postgres",
+        "jdbcUser": "postgres",
+        "jdbcPassword": "Qq111111",
+        "maximumPoolSize": "10",
+        "minimumIdle": "2",
+        "connectionTimeout": "30000",
+        "idleTimeout": "300000",
+        "maxLifetime": "600000",
+        "leakDetectionThreshold": "60000",
+        "poolName": "calcite-postgres-hikari-pool"
+      }
+    },
+    {
+      "name": "calcite_views",
+      "tables": [
+        {
+          "name": "allUsers",
+          "type": "view",
+          "sql": "SELECT a.\"id\" AS \"id\", a.\"user_name\" AS \"username\", a.\"age\" AS \"age\", a.\"sex\" AS \"sex\", b.\"user_level\" AS \"level\" FROM \"mysql\".\"t_user\" AS a JOIN \"pg\".\"t_level\" AS b ON a.\"user_name\" = b.\"user_name\""
+        }
+        ]
+    }
+  ]
+}
