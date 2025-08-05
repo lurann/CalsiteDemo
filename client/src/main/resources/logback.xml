@@ -1,11 +1,24 @@
 <configuration>
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
     <root level="info">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="console" />
     </root>
+
+    <logger name="com.zaxxer.hikari" level="trace" additivity="false">
+            <appender-ref ref="console" />
+    </logger>
+
+    <logger name="com.zaxxer.hikari.pool.ProxyConnection" level="trace" additivity="false">
+            <appender-ref ref="console" />
+    </logger>
+
+    <logger name="com.zaxxer.hikari.pool.HikariProxyConnection" level="trace" additivity="false">
+            <appender-ref ref="console" />
+    </logger>
+
 </configuration>

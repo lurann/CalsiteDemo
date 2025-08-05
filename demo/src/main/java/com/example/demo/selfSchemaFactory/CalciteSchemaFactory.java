@@ -14,8 +14,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class CalciteSchemaFactory implements SchemaFactory {
 
-    private static final ConcurrentHashMap<String, Schema> schemaCache = new ConcurrentHashMap<>();    @Override
+    private static final ConcurrentHashMap<String, Schema> schemaCache = new ConcurrentHashMap<>();
 
+    @Override
     public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
 
         String cacheKey = generateCacheKey(operand);
