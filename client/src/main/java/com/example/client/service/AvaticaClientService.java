@@ -1,6 +1,7 @@
 package com.example.client.service;
 
 import com.example.client.entity.User;
+import com.example.client.entity.UserPg;
 import com.example.client.mapper.UserMapper;
 import com.example.client.monitor.HashCodeBasedConnectionTracker;
 import com.zaxxer.hikari.HikariDataSource;
@@ -34,18 +35,24 @@ public class AvaticaClientService  {
     }
 
 
-    public CompletableFuture<List<User>> executeQueryUser(String userName, String type) {
-        log.info("executeQueryUser: {}-{}", userName, type);
-        return CompletableFuture.supplyAsync(() -> {
-            try (Connection connection = dataSource.getConnection();){
-                connectionTracker.logConnectionWithHashCode(connection, "executeQueryUser");
+    public List<User> executeQueryUser(String userName, String type) {
+        return userMapper.getUserByName(userName, type);
 
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-            return userMapper.getUserByName(userName, type);
-        }, avaticaTaskExecutor);
+        //        log.info("executeQueryUser: {}-{}", userName, type);
+//        return CompletableFuture.supplyAsync(() -> {
+//            try (Connection connection = dataSource.getConnection();){
+//                connectionTracker.logConnectionWithHashCode(connection, "executeQueryUser");
+//
+//            } catch (SQLException e) {
+//                throw new RuntimeException(e);
+//            }
+//            return userMapper.getUserByName(userName, type);
+//        }, avaticaTaskExecutor);
 
+    }
+
+    public List<UserPg> executeQueryUserPg(String userName, String type) {
+        return userMapper.getUserByNamePg(userName, type);
     }
 
     public CompletableFuture<Object> executeSql(String sql) {

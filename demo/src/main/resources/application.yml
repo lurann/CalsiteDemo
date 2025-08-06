@@ -30,7 +30,7 @@ calcite:
   server:
     port: 8765
     enabled: true
-    serialization: PROTOBUF
+    serialization: JSON
 
 logging:
   level:

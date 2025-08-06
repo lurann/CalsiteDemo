@@ -34,7 +34,7 @@ mybatis-plus:
 
 spring:
   datasource:
-    url: jdbc:ah:url=http://localhost:8765;serialization=PROTOBUF
+    url: jdbc:ah:url=http://localhost:8765;serialization=JSON
     driver-class-name: com.example.client.config.MyDriver
 
     hikari:

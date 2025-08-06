@@ -1,6 +1,7 @@
 package com.example.client.mapper;
 
 import com.example.client.entity.User;
+import com.example.client.entity.UserPg;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +11,7 @@ import java.util.List;
 public interface UserMapper {
 
 
-    @Select("SELECT * FROM ${type}.t_user WHERE user_name = #{userName}")
+    @Select("SELECT * FROM ${type}.t_user WHERE username = #{userName}")
     List<User> getUserByName(@Param("userName") String userName, @Param("type") String type);
 
 
@@ -18,11 +19,14 @@ public interface UserMapper {
     Object executeSelectSql(String sql);
 
     @Insert("${sql}")
-    Object executeInsertSql(String sql);
+    Integer executeInsertSql(String sql);
 
     @Update("${sql}")
-    Object executeUpdateSql(String sql);
+    Integer executeUpdateSql(String sql);
 
     @Delete("${sql}")
-    Object executeDeleteSql(String sql);
+    Integer executeDeleteSql(String sql);
+
+    @Select("SELECT * FROM ${type}.t_user WHERE username = #{userName}")
+    List<UserPg> getUserByNamePg(@Param("userName") String userName, @Param("type") String type);
 }

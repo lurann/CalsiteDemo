@@ -3,6 +3,7 @@ package com.example.client.controller;
 import com.example.client.entity.SqlBo;
 import com.example.client.entity.User;
 import com.example.client.entity.UserBO;
+import com.example.client.entity.UserPg;
 import com.example.client.service.AvaticaClientService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +23,7 @@ public class AvaticaClientController {
     }
 
     @PostMapping("/query")
-    public CompletableFuture<List<User>> executeQuery(@RequestBody UserBO userBO) {
+    public List<User> executeQuery(@RequestBody UserBO userBO) {
        return avaticaClientService.executeQueryUser(userBO.getUserName(), userBO.getType());
     }
 
@@ -34,6 +35,11 @@ public class AvaticaClientController {
     @GetMapping("/poolStatus")
     public String getStatus() {
         return avaticaClientService.getPoolStatus();
+    }
+
+    @PostMapping("/querypg")
+    public List<UserPg> executeQuerypg(@RequestBody UserBO userBO) {
+        return avaticaClientService.executeQueryUserPg(userBO.getUserName(), userBO.getType());
     }
 
 

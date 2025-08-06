@@ -4,19 +4,18 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
-import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
+
+import org.apache.calcite.avatica.com.fasterxml.jackson.annotation.JsonRawValue;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Date;
-import java.util.Map;
 
 @Data
 @TableName("t_user")
-public class User {
+public class UserPg {
     @TableId
     private Long id; // 主键ID
 
@@ -49,5 +48,8 @@ public class User {
 
     private String gender; // 性别（ENUM('M', 'F', 'Unknown')）
     private String status; // 状态（ENUM('Active', 'Inactive', 'Suspended')）
-    private String preferences; // 偏好设置（JSON类型）
+
+    @JsonRawValue
+    private  String preferences; // 偏好设置（JSON类型）
+
 }

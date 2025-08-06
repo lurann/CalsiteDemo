@@ -87,17 +87,17 @@ public class CalciteDataSourceConfig {
         return ds;
     }
 
-    @Bean("avaticaTaskExecutor")
-    public ThreadPoolTaskExecutor avaticaTaskExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(corePoolSize);
-        executor.setMaxPoolSize(maxPoolSize);
-        executor.setQueueCapacity(queueCapacity);
-        executor.setThreadNamePrefix(threadNamePrefix);
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-        return executor;
-    }
+//    @Bean("avaticaTaskExecutor")
+//    public ThreadPoolTaskExecutor avaticaTaskExecutor() {
+//        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+//        executor.setCorePoolSize(corePoolSize);
+//        executor.setMaxPoolSize(maxPoolSize);
+//        executor.setQueueCapacity(queueCapacity);
+//        executor.setThreadNamePrefix(threadNamePrefix);
+//        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+//        executor.initialize();
+//        return executor;
+//    }
 
     @Bean("avaticaServerExecutor")
     public ExecutorService avaticaServerExecutor() {
@@ -134,6 +134,9 @@ public class CalciteDataSourceConfig {
         configureUnderlyingServer();
         AvaticaHandler handler = getAvaticaHandler();
 
+//        CustomAvaticaServerConfiguration avaticaServerConfiguration = new CustomAvaticaServerConfiguration(
+//                "admin", "admin");
+
         avaticaServer = new HttpServer(serverPort, handler);
         avaticaServer.start();
 
@@ -159,7 +162,7 @@ public class CalciteDataSourceConfig {
 
     private AvaticaHandler getAvaticaHandler() throws SQLException {
         if (meta == null){
-            synchronized ( this){
+            synchronized (this){
                 Properties info = new Properties();
                 info.setProperty("lex", "JAVA");
                 info.setProperty("caseSensitive", "false");
@@ -172,7 +175,6 @@ public class CalciteDataSourceConfig {
         }
 
         LocalService service = new LocalService(meta);
-
         AvaticaHandler handler;
         if ("PROTOBUF".equalsIgnoreCase(serialization)) {
             handler = new AvaticaProtobufHandler(service);
