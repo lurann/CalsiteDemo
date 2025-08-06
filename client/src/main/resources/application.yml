@@ -5,38 +5,22 @@ logging:
   level:
     org.apache.calcite.avatica: INFO
     com.zaxxer.hikari: trace
-    com.zaxxer.hikari.HikariConfig: DEBUG
-    com.zaxxer.hikari.pool.HikariPool: DEBUG
+    com.zaxxer.hikari.HikariConfig: info
+    com.zaxxer.hikari.pool.HikariPool: info
     com.zaxxer.hikari.pool.PoolBase: TRACE
     com.zaxxer.hikari.connection: TRACE
     com.zaxxer.hikari.pool.ProxyConnection: TRACE
     com.zaxxer.hikari.pool.HikariProxyConnection: TRACE
-
     com.example.client.mapper: DEBUG
     org.apache.ibatis: DEBUG
     java.sql: DEBUG
-
     com.example.client.monitor: INFO
-
-
-mybatis-plus:
-  mapper-locations: classpath*:/mapper/**/*.xml
-  configuration:
-    map-underscore-to-camel-case: true
-    # 禁用自动提交的事务管理
-    jdbc-type-for-null: null
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      id-type: none
-      table-underline: true
 
 
 spring:
   datasource:
-    url: jdbc:ah:url=http://localhost:8765;serialization=JSON
+    url: jdbc:ah:url=http://localhost:8765
     driver-class-name: com.example.client.config.MyDriver
-
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
@@ -45,13 +29,9 @@ spring:
       max-lifetime: 1800000
       leak-detection-threshold: 5000
       pool-name: avatica-client-pool
-      connection-test-query: SELECT 1
       register-mbeans: true
-      initialization-fail-timeout: 1
-
-
-  data-source-properties:
-    caseSensitive: false
-    unquotedCasing: UNCHANGED
-    quotedCasing: UNCHANGED
-    lex: JAVA
+      data-source-properties:
+        serialization: JSON
+        authentication: BASIC
+        username: admin
+        password: admin

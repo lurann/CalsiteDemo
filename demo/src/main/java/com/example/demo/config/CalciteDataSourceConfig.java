@@ -134,11 +134,16 @@ public class CalciteDataSourceConfig {
         configureUnderlyingServer();
         AvaticaHandler handler = getAvaticaHandler();
 
-//        CustomAvaticaServerConfiguration avaticaServerConfiguration = new CustomAvaticaServerConfiguration(
-//                "admin", "admin");
+        CustomAvaticaServerConfiguration avaticaServerConfiguration = new CustomAvaticaServerConfiguration("admin", "admin");
+        try {
+            avaticaServer = new HttpServer(serverPort, handler,avaticaServerConfiguration ,null ,null, 1024*1024);
+            avaticaServer.start();
+        }catch (Exception e){
+            log.error("Failed to start Avatica server", e);
+        }
 
-        avaticaServer = new HttpServer(serverPort, handler);
-        avaticaServer.start();
+
+
 
         log.info("Avatica server started on port {} with {} serialization using thread pool",
                 serverPort, serialization);

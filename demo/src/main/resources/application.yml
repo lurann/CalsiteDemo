@@ -27,6 +27,7 @@ mybatis-plus:
 
 calcite:
   datasource-file: "C:\\Users\\AH\\idea\\demo\\demo\\src\\main\\resources\\model.json"
+  user-file: "C:\\Users\\AH\\idea\\demo\\demo\\src\\main\\resources\\avatica-users.properties"
   server:
     port: 8765
     enabled: true

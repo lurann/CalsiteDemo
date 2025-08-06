@@ -22,7 +22,10 @@
 - [x] 测试数据库连接切换到calcite  单个数据库查询 无mybatis-plus框架
 - [x] 测试数据库连接切换到calcite  多个数据库联合查询 无mybatis-plus框架与mybatis-plus框架均可
 - [x] 测试数据库连接切换到calcite  calcite建立数据库视图  联合mybatis-plus查询  
-- [ ] 测试calcite翻译sql能力  
+- [x] 测试calcite avatica连接及与mybatis-plus框架的兼容性  与输入原生sql兼容性
+- [x] 测试calcite avatica自定义连接url
+- [x] 测试calcite avatica连接池
+- [x] 测试calcite avatica连接账户权限认证  自定义驱动
 
 
 ## 存在的问题
